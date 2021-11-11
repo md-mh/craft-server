@@ -1,12 +1,12 @@
 const express = require('express');
+const { MongoClient } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 
 //Middleware
@@ -17,49 +17,96 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-async function run(){
-    try{
+async function run() {
+    try {
 
         await client.connect();
-        const database = client.db('siteDb');
-        const table = database.collection('data');
+        const database = client.db('Wood-Craft');
+        const productcollection = database.collection('product');
+        const ordercollection = database.collection('order');
 
         // GET API
-        app.get('/show', async (req,res)=>{
-            const getdata = table.find({});
+        app.get('/product', async (req, res) => {
+            const getdata = productcollection.find({});
             const showdata = await getdata.toArray();
             res.send(showdata);
         })
 
         // GET Single 
-        app.get('/show/:id', async(req,res)=>{
+        app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
-            const getId = {_id: ObjectId(id)};
-            const showId = await table.findOne(getId);
+            const getId = { _id: ObjectId(id) };
+            const showId = await productcollection.findOne(getId);
             res.json(showId);
         })
 
         // POST API
 
-        app.post('/show', async(req, res)=>{
+        app.post('/product', async (req, res) => {
             const add = req.body;
-            console.log("Add Post Api", add);
+            const result = await productcollection.insertOne(add);
+            console.log(result);
+            res.json(result);
+        }) 
 
-            const result = await table.insertOne(add);
+        // DELETE ORDER API
+        app.delete('/product/:id', async(req, res)=>{
+            const id = req.params.id;
+            const getId = {_id: ObjectId(id)};
+            const deleteId = await productcollection.deleteOne(getId);
+            res.json(deleteId);
+        })
+
+
+        // GET ORDER API
+        app.get('/order', async (req, res) => {
+            const getdata = ordercollection.find({});
+            const showdata = await getdata.toArray();
+            res.send(showdata);
+        })
+
+        // GET Single ORDER API
+        app.get('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const getId = { _id: ObjectId(id) };
+            const showId = await ordercollection.findOne(getId);
+            res.json(showId);
+        })
+
+        // POST ORDER API
+
+        app.post('/order', async (req, res) => {
+            const add = req.body;
+            const result = await ordercollection.insertOne(add);
             console.log(result);
             res.json(result);
         })
+        
+        //UPDATE ORDER API
+        app.put('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedOrder = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const update = {
+                $set: {
+                    name: updatedOrder.name, email: updatedOrder.email, place: updatedOrder.place, mobile: updatedOrder.mobile, members: updatedOrder.members, address: updatedOrder.address, status: updatedOrder.status 
+                },
+            };
+            const result = await ordercollection.updateOne(filter, update, options);
+            res.json(result);
+        })
 
-        // DELETE API
-        app.delete('/show/:id', async(req, res)=>{
+        // DELETE ORDER API
+        app.delete('/order/:id', async(req, res)=>{
             const id = req.params.id;
             const getId = {_id: ObjectId(id)};
-            const deleteId = await table.deleteOne(getId);
+            const deleteId = await ordercollection.deleteOne(getId);
             res.json(deleteId);
         })
 
     }
-    finally{
+    finally {
         // await client.close();
     }
 }
