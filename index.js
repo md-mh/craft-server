@@ -23,16 +23,17 @@ async function run() {
         await client.connect();
         const database = client.db('Wood-Craft');
         const productcollection = database.collection('product');
+        const reviewcollection = database.collection('review');
         const ordercollection = database.collection('order');
 
-        // GET API
+        // GET Product API
         app.get('/product', async (req, res) => {
             const getdata = productcollection.find({});
             const showdata = await getdata.toArray();
             res.send(showdata);
         })
 
-        // GET Single 
+        // GET Single Product API
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
             const getId = { _id: ObjectId(id) };
@@ -40,8 +41,7 @@ async function run() {
             res.json(showId);
         })
 
-        // POST API
-
+        // POST Product API
         app.post('/product', async (req, res) => {
             const add = req.body;
             const result = await productcollection.insertOne(add);
@@ -49,7 +49,7 @@ async function run() {
             res.json(result);
         }) 
 
-        // DELETE ORDER API
+        // DELETE Product API
         app.delete('/product/:id', async(req, res)=>{
             const id = req.params.id;
             const getId = {_id: ObjectId(id)};
@@ -57,6 +57,20 @@ async function run() {
             res.json(deleteId);
         })
 
+        // GET Review API
+        app.get('/review', async (req, res) => {
+            const getdata = reviewcollection.find({});
+            const showdata = await getdata.toArray();
+            res.send(showdata);
+        })
+
+        // POST Review API
+        app.post('/review', async (req, res) => {
+            const add = req.body;
+            const result = await reviewcollection.insertOne(add);
+            console.log(result);
+            res.json(result);
+        }) 
 
         // GET ORDER API
         app.get('/order', async (req, res) => {
