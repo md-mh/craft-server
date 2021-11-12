@@ -22,9 +22,44 @@ async function run() {
 
         await client.connect();
         const database = client.db('Wood-Craft');
+        const usercollection = database.collection('user');
         const productcollection = database.collection('product');
         const reviewcollection = database.collection('review');
         const ordercollection = database.collection('order');
+
+
+
+
+        // POST User API
+        app.post('/user', async(req,res)=>{
+            const user = req.body;
+            const result = await usercollection.insertOne(user);
+            console.log(result)
+            res.json('result');
+        })
+
+        //PUT User API
+        app.put('/user', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usercollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        });
+
+        // PUT Admin API
+        app.put('/user/admin', async (req, res)=>{
+            const user = req.body;
+            const filter = {email: user.email};
+            const options = { upsert: true };
+            const updateDoc = {
+                $set : {role: user.role}
+            }
+            const result = await usercollection.updateOne(filter, updateDoc, options);
+            res.json(result)
+        })
+
 
         // GET Product API
         app.get('/product', async (req, res) => {
@@ -40,6 +75,7 @@ async function run() {
             const showId = await productcollection.findOne(getId);
             res.json(showId);
         })
+
 
         // POST Product API
         app.post('/product', async (req, res) => {
@@ -104,7 +140,7 @@ async function run() {
             const options = { upsert: true };
             const update = {
                 $set: {
-                    name: updatedOrder.name, email: updatedOrder.email, place: updatedOrder.place, mobile: updatedOrder.mobile, members: updatedOrder.members, address: updatedOrder.address, status: updatedOrder.status 
+                    name: updatedOrder.name, email: updatedOrder.email, title: updatedOrder.title, mobile: updatedOrder.mobile, price: updatedOrder.price, address: updatedOrder.address, status: updatedOrder.status 
                 },
             };
             const result = await ordercollection.updateOne(filter, update, options);
