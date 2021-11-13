@@ -1,4 +1,4 @@
-# Wood-Craft (Client Site)
+# Wood-Craft (Server Site)
 
 Live Site: [Wood-Craft](https://craft-mh.web.app/).
 
