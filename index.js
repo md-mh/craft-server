@@ -28,7 +28,17 @@ async function run() {
         const ordercollection = database.collection('order');
 
 
-
+        // GET Admin API
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const getEmail = { email: email };
+            const user = await usercollection.findOne(getEmail);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+        })
 
         // POST User API
         app.post('/user', async(req,res)=>{
